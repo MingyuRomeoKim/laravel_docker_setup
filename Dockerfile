@@ -6,19 +6,66 @@ ARG uid
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
+    bash \
     curl \
+    freetype-dev \
+    g++ \
+    gcc \
+    git \
+    icu-dev \
+    icu-libs \
+    imagemagick \
+    libc-dev \
+    libjpeg-turbo-dev \
     libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip
+    libzip-dev \
+    make \
+    mysql-client \
+    nodejs \
+    nodejs-npm \
+    yarn \
+    openssh-client \
+    postgresql-libs \
+    rsync \
+    zlib-dev
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Install PECL and PEAR extensions
+RUN pecl install \
+    redis \
+    imagick \
+    xdebug
+
+# Enable PECL and PEAR extensions
+RUN docker-php-ext-enable \
+    redis \
+    imagick \
+    xdebug
+
+# Configure php extensions
+RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-configure zip --with-libzip
+
+# Install php extensions
+RUN docker-php-ext-install \
+    bcmath \
+    calendar \
+    curl \
+    exif \
+    gd \
+    iconv \
+    intl \
+    mbstring \
+    pdo \
+    pdo_mysql \
+    pdo_pgsql \
+    pdo_sqlite \
+    pcntl \
+    tokenizer \
+    xml \
+    zip
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
